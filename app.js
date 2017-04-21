@@ -39,6 +39,8 @@ class App extends Component {
     this.setSource = this.setSource.bind(this)
     this.handleRemoveItem = this.handleRemoveItem.bind(this);
     this.handleClearCompleted = this.handleClearCompleted.bind(this)
+    this.handleToggleEditing = this.handleToggleEditing.bind(this)
+    this.handleUpdateText = this.handleUpdateText.bind(this)
   }
 
   componentWillMount() {
@@ -61,6 +63,26 @@ class App extends Component {
     })
     AsyncStorage.setItem("items", JSON.stringify(items));
   }
+  handleUpdateText(key, text){
+    const newItems = this.state.items.map((item) => {
+      if (item.key !== key) return item;
+      return {
+        ...item,
+        text
+      }
+    })
+    this.setSource(newItems, filterItems(this.state.filter, newItems));
+  }
+  handleToggleEditing(key, editing) {
+    const newItems = this.state.items.map((item) => {
+      if (item.key !== key) return item;
+      return {
+        ...item,
+        editing
+      }
+    })
+    this.setSource(newItems, filterItems(this.state.filter, newItems));
+  }
   handleClearCompleted() {
     const newItems = this.state.items.filter((item) => {
       if (!item.complete) return true;
@@ -70,7 +92,7 @@ class App extends Component {
   handleFilter(filter){
     this.setSource(this.state.items, filterItems(filter, this.state.items), {filter})
   }
-  handleRemoveItem(filter) {
+  handleRemoveItem(key) {
     const newItems = this.state.items.filter((item) => {
       return item.key !== key
     })
@@ -125,6 +147,8 @@ class App extends Component {
               return (
                 <Row
                   key={key}
+                  onUpdate={(text) => this.handleUpdateText(key,text)}
+                  onToggleEdit={(editing) => this.handleToggleEditing(key, editing)}
                   onRemove={() => this.handleRemoveItem(key)}
                   onComplete={(complete) => this.handleToggleComplete(key, complete)}
                   {...value}

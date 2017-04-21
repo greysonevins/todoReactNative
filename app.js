@@ -8,7 +8,8 @@ import {
   StyleSheet,
   Platform,
   ListView,
-  Keyboard
+  Keyboard,
+  AsyncStorage
 } from 'react-native';
 
 const filterItems = (filter, items) => {
@@ -37,12 +38,24 @@ class App extends Component {
     this.handleRemoveItem = this.handleRemoveItem.bind(this);
     this.handleClearCompleted = this.handleClearCompleted.bind(this)
   }
+
+  componentWillMount() {
+    AsyncStorage.getItem("items").then((json) => {
+      try {
+        const items = JSON.parse(json);
+        this.setSource(items, items)
+      } catch (e) {
+
+      }
+    })
+  }
   setSource(items, itemsDatasource, otherState = {}){
     this.setState({
       items,
       dataSource: this.state.dataSource.cloneWithRows(itemsDatasource),
       ...otherState
     })
+    AsyncStorage.setItem("items", JSON.stringify(items));
   }
   handleClearCompleted() {
     const newItems = this.state.items.filter((item) => {
